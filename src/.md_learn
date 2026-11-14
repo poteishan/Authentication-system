@@ -1,0 +1,17 @@
+1. Get authenticated through server by /get-me
+2. Making server identify user, by user sending request and then server identifying and sending response to the user request to the user
+3. Problem: After successful identification
+eg. bank system, the user wants to access the bank account like /account/tracsaction/money, the token are generated. 
+- So token nneds to be saved: options - localstorage X because it can be seen on client side
+- only cookies X - While cookies (especially httpOnly cookies) are highly secure against Cross-Site Scripting (XSS) attacks because client-side JavaScript cannot access them, relying on them for everything presents challenges:
+Statelessness vs. Performance: Access tokens are meant to be short-lived to minimize the impact if they are compromised. If you only used cookies, you might be forced to make a database or session store lookup on every single request to verify the user, which defeats the purpose of the stateless JWT (JSON Web Token) architecture and hurts scalability.
+Flexibility: Storing the Access Token in memory (or the response body) allows the client to include it in the Authorization header for API requests. This is a standard practice that works across various client types (web, mobile, third-party services) more easily than relying on browser-based cookie propagation.
+Why the combination?
+
+Using both creates a balanced defense-in-depth strategy:
+
+Access Tokens (Short-lived): By storing these in memory (or returning them in the response body), they are easily accessible for frequent API requests. Since they expire quickly (e.g., 15 minutes), the window of risk if one is stolen is very small.
+Refresh Tokens (Long-lived): These are stored in httpOnly cookies to protect them from malicious scripts. Their sole purpose is to request a new access token when the current one expires.
+By separating them, you ensure that if an attacker manages to steal an access token, it will expire almost immediately. Meanwhile, the refresh token remains safely locked away in the cookie, unreachable by the attacker's scripts, allowing the legitimate user to maintain their session without constantly re-logging.
+
+Also, we use hash format to store the tokens into cookie
